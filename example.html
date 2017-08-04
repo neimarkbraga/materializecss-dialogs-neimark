@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>MaterializeCss Dialogs Neimark Sample</title>
+        <!--jquery-->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+        <!--MetrializeCss Links-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/js/materialize.min.js"></script>
+
+        <!--the plugin-->
+        <script type="text/javascript" src="materializecss-dialogs-neimark.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Example</h1>
+            <div class="divider"></div><br />
+            <button class="btn" id="alertButton" type="button">alert</button>
+            <button class="btn" id="confirmButton" type="button">confirm</button>
+            <button class="btn" id="promptButton" type="button">prompt</button>
+            <button class="btn" id="preloaderButton" type="button">preloder</button>
+            <br /><br />
+            <div class="divider"></div><br />
+            <div id="statusBox">
+
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                var myDialog = new MaterializeDialog({
+                    color: '', //Color for your preloader and button. default value is *empty string*
+                    opacity: .5, // Opacity of modal background
+                    inDuration: 300, // Transition in duration
+                    outDuration: 200, // Transition out duration
+                    startingTop: '4%', // Starting top style attribute
+                    endingTop: '10%', // Ending top style attribute
+                    dialogTitleTag: 'h4', // The tag name for the dialog's title
+                    preloaderSize: 'small', // Size of circular preloader
+                    preloaderLabelTag: 'h5', // Tag Name for the preloader's label
+                    preloaderDefaultLabel: 'Loading...' // Default label of preloader. takes place if label is not specified at instance
+                });
+
+                $('#alertButton').on("click", function () {
+                    myDialog.alert("Hello World", "this is a message to display", function () {
+                        $('#statusBox').append('alert callback executed <br />');
+                    });
+                });
+
+                $('#confirmButton').on("click", function () {
+                    myDialog.confirm("Confirm", "Do you want to execute your action?", function (err, result) {
+                        $('#statusBox').append('confirm result: ' + result + ' <br />');
+                    });
+                });
+
+                $('#promptButton').on("click", function () {
+                    var promptOptions = {
+                        type: 'text', //default is text
+                        placeholder: 'Your Name', //default is empty string
+                        value: '', //default is empty string
+                        required: true //default is false
+                    };
+
+                    myDialog.prompt("Your Name", "What is your name?", function (err, result) {
+                        $('#statusBox').append('prompt result: ' + result + ' <br />');
+                    },promptOptions);
+                });
+
+                $('#preloaderButton').on("click", function () {
+                    var myPreloader = new myDialog.preloader("Retrieving data from server"); //This line of code will trigger a new preloader to display
+
+                    //preloader cannot be closed with user interaction, you have to close it programmatically
+                    setTimeout(function(){//just to simulate a process
+                        myPreloader.close(); //close preloader after 5 seconds
+                        $('#statusBox').append('preloader closed <br />');
+                    }, 2000);
+                });
+
+            });
+        </script>
+    </body>
+</html>
