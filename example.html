@@ -4,11 +4,11 @@
         <meta charset="UTF-8">
         <title>MaterializeCss Dialogs Neimark Sample</title>
         <!--jquery-->
-        <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="assets/jquery/dist/jquery.min.js"></script>
 
         <!--MetrializeCss Links-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/css/materialize.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/js/materialize.min.js"></script>
+        <link rel="stylesheet" href="assets/materialize-css/dist/css/materialize.min.css" />
+        <script src="assets/materialize-css/dist/js/materialize.min.js"></script>
 
         <!--the plugin-->
         <script type="text/javascript" src="dist/materializecss-dialogs-neimark.min.js"></script>
@@ -49,7 +49,7 @@
                 });
 
                 $('#confirmButton').on("click", function () {
-                    myDialog.confirm("Confirm", "Do you want to execute your action?", function (err, result) {
+                    myDialog.confirm("Confirm", "Do you want to execute your action?", function (result) {
                         $('#statusBox').append('confirm result: ' + result + ' <br />');
                     });
                 });
@@ -59,20 +59,24 @@
                         type: 'text', //default is text
                         placeholder: 'Your Name', //default is empty string
                         value: '', //default is empty string
-                        required: true //default is false
+                        required: false //default is false
                     };
 
-                    myDialog.prompt("Your Name", "What is your name?", function (err, result) {
+                    myDialog.prompt("Your Name", "What is your name?", function (result) {
                         $('#statusBox').append('prompt result: ' + result + ' <br />');
                     },promptOptions);
                 });
 
                 $('#preloaderButton').on("click", function () {
+
+
+
                     var myPreloader = new myDialog.preloader("Retrieving data from server"); //This line of code will trigger a new preloader to display
+                    myPreloader.open();
 
                     //preloader cannot be closed with user interaction, you have to close it programmatically
                     setTimeout(function(){//just to simulate a process
-                        myPreloader.close(); //close preloader after 5 seconds
+                        myPreloader.destroy(); //destroy preloader after 5 seconds
                         $('#statusBox').append('preloader closed <br />');
                     }, 2000);
                 });

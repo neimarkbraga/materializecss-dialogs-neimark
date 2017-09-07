@@ -1,7 +1,8 @@
 /*
  Title: Neimark Materialize Css Dialogs
  Author: Neimark Junsay Braga
- Date: Aug 4, 2017
+ Date: Sep 9, 2017
+ version: 1.1.0
  */
 function MaterializeDialog(options) {
     //variables
@@ -18,6 +19,7 @@ function MaterializeDialog(options) {
         preloader_label_tag: options.preloaderLabelTag || 'h5',
         preloader_default_label: options.preloaderDefaultLabel || 'Loading...'
     };
+
     var createCircularPreLoader = function () {
         var circle = document.createElement('div');
         $(circle)
@@ -47,6 +49,7 @@ function MaterializeDialog(options) {
             .append(spinner_layer);
         return pre_loader_wrapper;
     };
+
     var TopModal = function (options) {
         var ThisModal = this;
         if(!options) options = {};
@@ -82,22 +85,37 @@ function MaterializeDialog(options) {
             });
         $('body').append(this.body);
     };
-    var BottomModal = function () {
+    var BottomModal = function (options) {
         var ThisModal = this;
+        if(!options) options = {};
+        var modalOptions = {
+            removeOnHide: (options.removeOnHide === undefined)? true : options.removeOnHide
+        };
         this.label = document.createElement(myOptions.preloader_label_tag);
         this.content = document.createElement('div');
         this.body = document.createElement('div');
+        this.td1 = document.createElement('td');
+        this.td2 = document.createElement('td');
+        this.tr = document.createElement('tr');
+        this.table = document.createElement('table');
         this.onReady = function () {};
         this.onComplete = function () {};
         $(this.label)
             .css('display', 'inline-block')
             .css('margin', '0px 10px');
-        $(this.content)
-            .css('display', 'flex')
-            .css('align-items', 'center')
-            .attr('class', 'modal-content')
-            .append(createCircularPreLoader())
+        $(this.td1)
+            .append(createCircularPreLoader());
+        $(this.td2)
+            .css('width', '100%')
             .append(this.label);
+        $(this.tr)
+            .append(this.td1)
+            .append(this.td2);
+        $(this.table)
+            .append(this.tr);
+        $(this.content)
+            .attr('class', 'modal-content')
+            .append(this.table);
         $(this.body)
             .attr('class', 'modal bottom-sheet')
             .append(this.content)
@@ -109,7 +127,7 @@ function MaterializeDialog(options) {
                 startingTop: myOptions.starting_top,
                 endingTop: myOptions.ending_top,
                 ready: function () {ThisModal.onReady();},
-                complete: function () {ThisModal.onComplete(); $(ThisModal.body).remove();}
+                complete: function () {ThisModal.onComplete(); if(modalOptions.removeOnHide) $(ThisModal.body).remove();}
             });
         $('body')
             .append(this.body);
@@ -166,7 +184,7 @@ function MaterializeDialog(options) {
             .html('YES')
             .on('click', function () {
                 $(myModal.body).modal('close');
-                _callback(null, true);
+                _callback(true);
             });
         $(component.no_button)
             .css('margin', '0 5px')
@@ -175,7 +193,7 @@ function MaterializeDialog(options) {
             .html('NO')
             .on('click', function () {
                 $(myModal.body).modal('close');
-                _callback(null, false);
+                _callback(false);
             });
         $(myModal.title).html(_title);
         $(myModal.inner_content)
@@ -198,7 +216,7 @@ function MaterializeDialog(options) {
         var _callback = callback || function () {};
         var _type = options.type || 'text';
         var _placeholder = options.placeholder || '';
-        var _value = options.value || '';
+        var _value = options.value || undefined;
         var _required = options.required;
         var myModal = new TopModal({dismissible: false});
         var component = {
@@ -207,7 +225,8 @@ function MaterializeDialog(options) {
             input: document.createElement('input'),
             input_field: document.createElement('div'),
             form: document.createElement('form'),
-            ok_button: document.createElement('button')
+            ok_button: document.createElement('button'),
+            cancel_button: document.createElement('button')
         };
         $(component.paragraph)
             .css('margin-bottom', '25px')
@@ -226,10 +245,20 @@ function MaterializeDialog(options) {
             .append(component.placeholder)
             .attr('class', 'input-field');
         $(component.ok_button)
+            .css('margin', '0 5px')
             .css('background-color', myOptions.color)
             .attr('type', 'submit')
             .attr('class', 'btn waves-effect waves-light')
             .html('OK');
+        $(component.cancel_button)
+            .css('margin', '0 5px')
+            .attr('type', 'button')
+            .attr('class', 'btn-flat waves-effect')
+            .html('CANCEL')
+            .on('click', function () {
+                _callback(undefined);
+                $(myModal.body).modal('close');
+            });
         $(myModal.title)
             .html(_title);
         $(myModal.inner_content)
@@ -237,14 +266,18 @@ function MaterializeDialog(options) {
             .append(component.paragraph)
             .append(component.input_field);
         $(myModal.footer)
-            .html('')
+            .html('');
+        if(!_required)
+            $(myModal.footer)
+                .append(component.cancel_button);
+        $(myModal.footer)
             .append(component.ok_button);
         $(component.form)
             .append(myModal.content)
             .append(myModal.footer)
             .on('submit', function (e) {
                 e.preventDefault();
-                _callback(null, $(component.input).val());
+                _callback($(component.input).val());
                 $(myModal.body).modal('close');
             });
         $(myModal.body)
@@ -255,9 +288,11 @@ function MaterializeDialog(options) {
         };
     };
     this.preloader = function (label) {
-        var myModal = new BottomModal();
+        var myModal = new BottomModal({removeOnHide: false});
         $(myModal.label).html(label || myOptions.preloader_default_label);
-        $(myModal.body).modal('open');
+        this.open = function () {$(myModal.body).modal('open');};
         this.close = function () {$(myModal.body).modal('close');};
+        this.destroy = function () {$(myModal.body).modal('close'); $(myModal.body).remove();};
+        this.changeLabel = function (newLabel) {$(myModal.label).html(newLabel);}
     };
 }
